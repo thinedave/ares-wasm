@@ -79,6 +79,7 @@ namespace nall {
     static constexpr bool Android = 0;
     static constexpr bool Linux   = 0;
     static constexpr bool BSD     = 0;
+    static constexpr bool Wasm    = 0;
   };
 #elif defined(__APPLE__)
   #define PLATFORM_MACOS
@@ -88,6 +89,7 @@ namespace nall {
     static constexpr bool Android = 0;
     static constexpr bool Linux   = 0;
     static constexpr bool BSD     = 0;
+    static constexpr bool Wasm    = 0;
   };
 #elif defined(__ANDROID__)
   #define PLATFORM_ANDROID
@@ -97,8 +99,9 @@ namespace nall {
     static constexpr bool Android = 1;
     static constexpr bool Linux   = 0;
     static constexpr bool BSD     = 0;
+    static constexpr bool Wasm    = 0;
   };
-#elif defined(linux) || defined(__linux__)
+#elif defined(linux) || defined(__linux__) || defined(__EMSCRIPTEN__) || defined(__wasm__)
   #define PLATFORM_LINUX
   struct Platform {
     static constexpr bool Windows = 0;
@@ -106,6 +109,7 @@ namespace nall {
     static constexpr bool Android = 0;
     static constexpr bool Linux   = 1;
     static constexpr bool BSD     = 0;
+    static constexpr bool Wasm    = 0;
   };
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
   #define PLATFORM_BSD
@@ -115,6 +119,7 @@ namespace nall {
     static constexpr bool Android = 0;
     static constexpr bool Linux   = 0;
     static constexpr bool BSD     = 1;
+    static constexpr bool Wasm    = 0;
   };
 #else
   #error "unable to detect platform"
@@ -152,42 +157,18 @@ namespace nall {
   };
 #endif
 
-/* Display server detection */
-
-#if defined(_WIN32)
-  #define DISPLAY_WINDOWS
-  struct DisplayServer {
-    static constexpr bool Windows = 1;
-    static constexpr bool Quartz  = 0;
-    static constexpr bool Xorg    = 0;
-  };
-#elif defined(__APPLE__)
-  #define DISPLAY_QUARTZ
-  struct DisplayServer {
-    static constexpr bool Windows = 0;
-    static constexpr bool Quartz  = 1;
-    static constexpr bool Xorg    = 0;
-  };
-#else
-  #define DISPLAY_XORG
-  struct DisplayServer {
-    static constexpr bool Windows = 0;
-    static constexpr bool Quartz  = 0;
-    static constexpr bool Xorg    = 1;
-  };
-#endif
-
 /* Architecture detection */
 
 #if defined(__i386__) || defined(_M_IX86)
   #define ARCHITECTURE_X86
   struct Architecture {
-    static constexpr bool x86   = 1;
-    static constexpr bool amd64 = 0;
-    static constexpr bool arm64 = 0;
-    static constexpr bool arm32 = 0;
-    static constexpr bool ppc64 = 0;
-    static constexpr bool ppc32 = 0;
+    static constexpr bool x86    = 1;
+    static constexpr bool amd64  = 0;
+    static constexpr bool arm64  = 0;
+    static constexpr bool arm32  = 0;
+    static constexpr bool ppc64  = 0;
+    static constexpr bool ppc32  = 0;
+    static constexpr bool wasm32 = 0;
   };
 #elif defined(__amd64__) || defined(_M_AMD64)
   #define ARCHITECTURE_AMD64
@@ -195,12 +176,13 @@ namespace nall {
     #define ARCHITECTURE_SUPPORTS_SSE4_1 1
   #endif
   struct Architecture {
-    static constexpr bool x86   = 0;
-    static constexpr bool amd64 = 1;
-    static constexpr bool arm64 = 0;
-    static constexpr bool arm32 = 0;
-    static constexpr bool ppc64 = 0;
-    static constexpr bool ppc32 = 0;
+    static constexpr bool x86    = 0;
+    static constexpr bool amd64  = 1;
+    static constexpr bool arm64  = 0;
+    static constexpr bool arm32  = 0;
+    static constexpr bool ppc64  = 0;
+    static constexpr bool ppc32  = 0;
+    static constexpr bool wasm32 = 0;
   };
 #elif defined(__aarch64__) || defined(_M_ARM64)
   #define ARCHITECTURE_ARM64
@@ -208,42 +190,57 @@ namespace nall {
     #define ARCHITECTURE_SUPPORTS_SSE4_1 1 // simulated via sse2neon.h
   #endif
   struct Architecture {
-    static constexpr bool x86   = 0;
-    static constexpr bool amd64 = 0;
-    static constexpr bool arm64 = 1;
-    static constexpr bool arm32 = 0;
-    static constexpr bool ppc64 = 0;
-    static constexpr bool ppc32 = 0;
+    static constexpr bool x86    = 0;
+    static constexpr bool amd64  = 0;
+    static constexpr bool arm64  = 1;
+    static constexpr bool arm32  = 0;
+    static constexpr bool ppc64  = 0;
+    static constexpr bool ppc32  = 0;
+    static constexpr bool wasm32 = 0;
   };
 #elif defined(__arm__)
   #define ARCHITECTURE_ARM32
   struct Architecture {
-    static constexpr bool x86   = 0;
-    static constexpr bool amd64 = 0;
-    static constexpr bool arm64 = 0;
-    static constexpr bool arm32 = 1;
-    static constexpr bool ppc64 = 0;
-    static constexpr bool ppc32 = 0;
+    static constexpr bool x86    = 0;
+    static constexpr bool amd64  = 0;
+    static constexpr bool arm64  = 0;
+    static constexpr bool arm32  = 1;
+    static constexpr bool ppc64  = 0;
+    static constexpr bool ppc32  = 0;
+    static constexpr bool wasm32 = 0;
   };
 #elif defined(__ppc64__) || defined(_ARCH_PPC64)
   #define ARCHITECTURE_PPC64
   struct Architecture {
-    static constexpr bool x86   = 0;
-    static constexpr bool amd64 = 0;
-    static constexpr bool arm64 = 0;
-    static constexpr bool arm32 = 0;
-    static constexpr bool ppc64 = 1;
-    static constexpr bool ppc32 = 0;
+    static constexpr bool x86    = 0;
+    static constexpr bool amd64  = 0;
+    static constexpr bool arm64  = 0;
+    static constexpr bool arm32  = 0;
+    static constexpr bool ppc64  = 1;
+    static constexpr bool ppc32  = 0;
+    static constexpr bool wasm32 = 0;
   };
 #elif defined(__ppc__) || defined(_ARCH_PPC) || defined(_M_PPC)
   #define ARCHITECTURE_PPC32
   struct Architecture {
-    static constexpr bool x86   = 0;
-    static constexpr bool amd64 = 0;
-    static constexpr bool arm64 = 0;
-    static constexpr bool arm32 = 0;
-    static constexpr bool ppc64 = 0;
-    static constexpr bool ppc32 = 1;
+    static constexpr bool x86    = 0;
+    static constexpr bool amd64  = 0;
+    static constexpr bool arm64  = 0;
+    static constexpr bool arm32  = 0;
+    static constexpr bool ppc64  = 0;
+    static constexpr bool ppc32  = 1;
+    static constexpr bool wasm32 = 0;
+  };
+#elif defined(__EMSCRIPTEN__) || defined(__wasm__)
+  #define ARCHITECTURE_WASM32
+  struct Architecture {
+    static constexpr bool x86    = 0;
+    static constexpr bool amd64  = 0;
+    static constexpr bool arm64  = 0;
+    static constexpr bool arm32  = 0;
+    static constexpr bool ppc64  = 0;
+    static constexpr bool ppc32  = 0;
+    static constexpr bool wasm32 = 1;
   };
 #else
   #error "unable to detect architecture"
@@ -251,6 +248,42 @@ namespace nall {
 
 #if !defined(ARCHITECTURE_SUPPORTS_SSE4_1)
   #define ARCHITECTURE_SUPPORTS_SSE4_1 0
+#endif
+
+/* Display server detection */
+
+#if defined(_WIN32)
+  #define DISPLAY_WINDOWS
+  struct DisplayServer {
+    static constexpr bool Windows = 1;
+    static constexpr bool Quartz  = 0;
+    static constexpr bool Web     = 0;
+    static constexpr bool Xorg    = 0;
+  };
+#elif defined(__APPLE__)
+  #define DISPLAY_QUARTZ
+  struct DisplayServer {
+    static constexpr bool Windows = 0;
+    static constexpr bool Quartz  = 1;
+    static constexpr bool Web     = 0;
+    static constexpr bool Xorg    = 0;
+  };
+#elif defined(ARCHITECTURE_WASM32)
+  #define DISPLAY_WEB
+  struct DisplayServer {
+    static constexpr bool Windows = 0;
+    static constexpr bool Quartz  = 0;
+    static constexpr bool Web     = 1;
+    static constexpr bool Xorg    = 0;
+  };
+#else
+  #define DISPLAY_XORG
+  struct DisplayServer {
+    static constexpr bool Windows = 0;
+    static constexpr bool Quartz  = 0;
+    static constexpr bool Web     = 0;
+    static constexpr bool Xorg    = 1;
+  };
 #endif
 
 /* Endian detection */

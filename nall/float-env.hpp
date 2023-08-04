@@ -46,11 +46,21 @@ struct float_env {
 #else
   static constexpr u32 denormal   = 0;
 #endif
+#if defined(ARCHITECTURE_WASM32)
+// WASM doesn't support specific exceptions, define dummy values here:
+// https://webassembly.github.io/spec/core/exec/numerics.html#floating-point-operations
+  static constexpr u32 inexact    = 0x10;
+  static constexpr u32 underflow  = 0x08;
+  static constexpr u32 overflow   = 0x04;
+  static constexpr u32 divByZero  = 0x02;
+  static constexpr u32 invalid    = 0x01;
+#else
   static constexpr u32 inexact    = FE_INEXACT;
   static constexpr u32 underflow  = FE_UNDERFLOW;
   static constexpr u32 overflow   = FE_OVERFLOW;
   static constexpr u32 divByZero  = FE_DIVBYZERO;
   static constexpr u32 invalid    = FE_INVALID;
+#endif
   static constexpr u32 downward   = FE_DOWNWARD;
   static constexpr u32 toNearest  = FE_TONEAREST;
   static constexpr u32 towardZero = FE_TOWARDZERO;

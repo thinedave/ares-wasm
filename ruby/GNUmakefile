@@ -10,6 +10,14 @@ ifeq ($(ruby),)
     ruby += video.cgl
     ruby += audio.openal
     ruby += input.quartz #input.carbon
+  else ifeq ($(wasm32),true)
+    pkg_check = $(if $(shell pkg-config $1 && echo 1),$2)
+    ruby += video.webgl2
+    # OpenAL support: https://emscripten.org/docs/porting/Audio.html
+    ruby += $(call pkg_check,openal,audio.openal)
+#    ruby += input.xlib
+ #   ruby += $(call pkg_check,libudev,input.udev)
+    ruby += $(call pkg_check,sdl2,input.sdl)
   else ifeq ($(platform),linux)
     pkg_check = $(if $(shell pkg-config $1 && echo 1),$2)
     ruby += video.glx video.glx2 video.xshm
@@ -86,6 +94,8 @@ ifeq ($(platform),bsd)
   ruby.options += $(if $(findstring audio.openal,$(ruby)),-lopenal -fuse-ld=bfd)
   # -fuse-ld=bfd: see FreeBSD bug 219089
 endif
+
+ruby.options += -sMIN_WEBGL_VERSION=2 -sMIN_WEBGL_VERSION=2 -sFULL_ES3=1
 
 ruby.objects := $(object.path)/ruby.o
 

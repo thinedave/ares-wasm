@@ -104,7 +104,10 @@ else
   endif
 endif
 
-# global compiler flags
+ifeq ($(wasm32),true)
+  compiler := emcc
+endif
+
 ifeq ($(cl),true)
   flags.c      = -nologo -W0 -Fd$(object.path)/ -TC -std:c11
   flags.cpp    = -nologo -W0 -Fd$(object.path)/ -TP -std:c++17 -EHsc
@@ -115,6 +118,15 @@ else
   flags.objc   = -x objective-c -std=c11
   flags.objcpp = -x objective-c++ -std=c++17
   flags.deps   = -MMD -MP -MF $(@:.o=.d)
+endif
+
+ifeq ($(wasm32),true)
+  flags.cpp += -lGL -s TOTAL_MEMORY=536870912 --use-preload-plugins
+  flags.cpp += -sMIN_WEBGL_VERSION=2 -sMIN_WEBGL_VERSION=2 -sFULL_ES3=1
+
+  flags.c += -lGL -s TOTAL_MEMORY=536870912 --use-preload-plugins
+  flags.c += -sMIN_WEBGL_VERSION=2 -sMIN_WEBGL_VERSION=2 -sFULL_ES3=1
+
 endif
 
 # explicit architecture flags to allow for cross-compilation on macos

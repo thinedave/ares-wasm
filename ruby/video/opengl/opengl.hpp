@@ -4,14 +4,15 @@
   #ifndef glGetProcAddress
     #define glGetProcAddress(name) (*glXGetProcAddress)((const GLubyte*)(name))
   #endif
+#elif defined(DISPLAY_WEB)
+  #include <GL/glew.h>
+  #include <GL/gl.h>
+  #include <GL/glext.h>
 #elif defined(DISPLAY_QUARTZ)
   #include <OpenGL/gl3.h>
 #elif defined(DISPLAY_WINDOWS)
   #include <GL/gl.h>
   #include <GL/glext.h>
-  #ifndef glGetProcAddress
-    #define glGetProcAddress(name) wglGetProcAddress(name)
-  #endif
 #else
   #error "ruby::OpenGL3: unsupported platform"
 #endif

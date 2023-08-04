@@ -18,6 +18,10 @@
   #include <ruby/video/glx2.cpp>
 #endif
 
+#if defined(VIDEO_WEBGL2)
+  #include <ruby/video/webgl2.cpp>
+#endif
+
 #if defined(VIDEO_WGL)
   #include <ruby/video/wgl.cpp>
 #endif
@@ -176,6 +180,10 @@ auto Video::create(string driver) -> bool {
   if(driver == "OpenGL 2.0") self.instance = new VideoGLX2(*this);
   #endif
 
+  #if defined(VIDEO_WEBGL2)
+  if(driver == "WebGL 2.0") self.instance = new VideoWebGL2(*this);
+  #endif
+
   #if defined(VIDEO_WGL)
   if(driver == "OpenGL 3.2") self.instance = new VideoWGL(*this);
   #endif
@@ -220,6 +228,10 @@ auto Video::hasDrivers() -> vector<string> {
   "OpenGL 2.0",
   #endif
 
+  #if defined(VIDEO_WEBGL2)
+  "WebGL 2.0",
+  #endif
+
   #if defined(VIDEO_XVIDEO)
   "XVideo",
   #endif
@@ -232,7 +244,9 @@ auto Video::hasDrivers() -> vector<string> {
 }
 
 auto Video::optimalDriver() -> string {
-  #if defined(VIDEO_WGL)
+  #if defined(VIDEO_WEBGL2)
+  return "WebGL 2.0";
+  #elif defined(VIDEO_WGL)
   return "OpenGL 3.2";
   #elif defined(VIDEO_DIRECT3D9)
   return "Direct3D 9.0";
@@ -254,7 +268,9 @@ auto Video::optimalDriver() -> string {
 }
 
 auto Video::safestDriver() -> string {
-  #if defined(VIDEO_DIRECT3D)
+  #if defined(VIDEO_WEBGL2)
+  return "WebGL 2.0";
+  #elif defined(VIDEO_DIRECT3D)
   return "Direct3D 9.0";
   #elif defined(VIDEO_WGL)
   return "OpenGL 3.2";

@@ -24,6 +24,11 @@
   #include <cguid.h>
   #include <mmsystem.h>
 #endif
+// #elif defined(DISPLAY_WEB)
+//   #include <emscripten.h>
+//   #include <SDL/SDL.h>
+//   #include <SDL_opengles2.h>
+// #endif
 
 using namespace nall;
 using namespace ruby;

@@ -33,7 +33,10 @@ ifeq ($(platform),macos)
 endif
 
 ifneq ($(filter $(platform),linux bsd),)
-  ifeq ($(hiro),)
+
+  ifeq ($(wasm32),true)
+    hiro := web
+  else ifeq ($(hiro),)
     hiro := gtk3
   endif
 
